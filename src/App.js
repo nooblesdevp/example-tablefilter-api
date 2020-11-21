@@ -2,21 +2,32 @@ import { useEffect, useState } from "react";
 import { Form, FormControl, FormLabel } from "react-bootstrap";
 import "./App.css";
 import DataTable from "./pages/DataTable";
+import axios from "axios";
+import * as ReactBootStrap from "react-bootstrap";
 
 require("es6-promise");
 require("isomorphic-fetch");
-
-const API = "https://devmentor.live/api/examples/contacts?api_key=289e8f6f";
 
 function App() {
   const [data, setData] = useState([]);
   const [q, setQ] = useState("");
   const [searchForm, setSearchForm] = useState(["firstName", "lastName"]);
+  const [loading, setLoading] = useState(false);
+
+  const API = "https://devmentor.live/api/examples/contacts?api_key=289e8f6f";
 
   useEffect(() => {
-    fetch(`${API}`)
-      .then((res) => res.json())
-      .then((json) => setData(json));
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`${API}`);
+        console.log("res", res.data);
+        setData(res.data);
+        setLoading(true);
+      } catch (err) {
+        console.log("err", err);
+      }
+    };
+    fetchData();
   }, []);
 
   function search(rows) {
@@ -56,7 +67,11 @@ function App() {
             </FormLabel>
           ))}
       </Form>
-      <DataTable data={search(data)} />
+      {loading ? (
+        <DataTable data={search(data)} />
+      ) : (
+        <ReactBootStrap.Spinner animation="border" />
+      )}
     </div>
   );
 }
